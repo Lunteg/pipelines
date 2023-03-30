@@ -1,0 +1,9 @@
+FROM postgres:11
+WORKDIR /db
+
+ENV POSTGRES_PASSWORD=admin
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_DB=pipelines
+ENV POSTGRES_HOST=db
+
+COPY . .

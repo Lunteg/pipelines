@@ -110,10 +110,35 @@ class CTAS(BaseTask):
 
     def short_description(self):
         return f'{self.title}'
+    
+    def create_fun_domain_of_url(self, con):
+            query = text("drop function if exists domain_of_url;")
+            con.execute(query)
+            con.commit()
+            
+            query = text("""
+                    create or replace function domain_of_url(url text)
+                    returns text
+                    language plpgsql
+                    as
+                    $$
+                    declare
+                    domain_of_url text;
+                    begin
+                    select (regexp_matches(url, '\/\/(.*?)\/', 'g'))[1]
+                    into domain_of_url;
+                    return domain_of_url;
+                    end;
+                    $$;
+                    """)
+            con.execute(query)
+            con.commit()
 
     def run(self):
         engine = self.create_engine()
         with engine.connect() as con:
+            self.create_fun_domain_of_url(con)
+            
             sql0 = text("DROP TABLE IF EXISTS %s" % (self.table))
             con.execute(sql0)
             sql1 = text("CREATE TABLE %s AS %s" % (self.table, self.sql_query))
